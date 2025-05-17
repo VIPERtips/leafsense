@@ -38,9 +38,23 @@ public class User implements UserDetails {
 	private Role role;
 	private String resetToken;
 	private LocalDateTime tokenExpiration;
+	private LocalDateTime otpExpiration;
+	
+	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private Profile profile;
+	public  LocalDateTime getOtpExpiration() {
+		return otpExpiration;
+	}
+
+	public  void setOtpExpiration(LocalDateTime otpExpiration) {
+		this.otpExpiration = otpExpiration;
+	}
+
 	private String OTP;
 	
-	//addcreated at and updated
+	private LocalDateTime createdAt;
+	private LocalDateTime updatedAt;
+	
 	
 	@Enumerated(EnumType.STRING)
 	 private UserStatus status = UserStatus.PENDING;
@@ -136,6 +150,22 @@ public class User implements UserDetails {
 	public String getUsername() {
 		
 		return email;
+	}
+
+	public LocalDateTime getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(LocalDateTime createdAt) {
+		this.createdAt = createdAt;
+	}
+
+	public LocalDateTime getUpdatedAt() {
+		return updatedAt;
+	}
+
+	public void setUpdatedAt(LocalDateTime updateedAt) {
+		this.updatedAt = updateedAt;
 	}
 	
 	

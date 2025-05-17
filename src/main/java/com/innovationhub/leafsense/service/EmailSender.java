@@ -75,7 +75,7 @@ public class EmailSender {
             <p>Welcome <strong>%s</strong>,</p>
             <p>Thanks for joining LeafSense! Use the OTP below to activate your account:</p>
             <h2 style="text-align: center; color: %s;">%s</h2>
-            <p>This OTP expires in 5 minutes.</p>
+            <p>This OTP expires in 2 hours.</p>
         """, userEmail, ACCENT_COLOR, otp);
 
         sendEmail(userEmail, BUSINESS_NAME + " - Account Activation", body);

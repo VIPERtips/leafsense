@@ -51,6 +51,7 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(newPassword));
         user.setResetToken(null); 
         user.setTokenExpiration(null);
+        user.setUpdatedAt(LocalDateTime.now());
         userRepository.save(user);
     }
     

@@ -1,5 +1,7 @@
 package com.innovationhub.leafsense.service;
 
+import java.time.LocalDateTime;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -57,6 +59,9 @@ public class AuthenticationService {
         
         String otp = userService.generateOTP();
         user.setOTP(otp);
+        user.setOtpExpiration(LocalDateTime.now().plusHours(2));
+        user.setCreatedAt(LocalDateTime.now());
+        user.setUpdatedAt(null);
 
         userRepository.save(user);
 
@@ -75,7 +80,12 @@ public class AuthenticationService {
         if (user.getOTP() == null || !user.getOTP().toString().equals(otp)) {
             throw new RuntimeException("Invalid OTP");
         }
+        if(LocalDateTime.now().isAfter(user.getOtpExpiration()) ) {
+        	throw new RuntimeException("OTP expired please request new");
+        }
         user.setStatus(UserStatus.APPROVED);
+        user.setUpdatedAt(LocalDateTime.now());
+        user.setOtpExpiration(null);
         user.setOTP(null); 
         userRepository.save(user);
     }
@@ -93,6 +103,7 @@ public class AuthenticationService {
 
         String otp = userService.generateOTP();
         user.setOTP(otp);
+        user.setOtpExpiration(LocalDateTime.now().plusHours(2));
         userRepository.save(user);
 
         emailSender.sendRegistrationEmail(user.getEmail(), otp);
