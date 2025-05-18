@@ -1,6 +1,7 @@
 package com.innovationhub.leafsense.model;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -22,6 +23,9 @@ public class Farm {
 	private String cropType;
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;
+	@OneToMany(mappedBy = "farm",cascade = CascadeType.ALL,orphanRemoval = true)
+	private List<EquipmentInventory> equipmentInventories;
+	
 	
 	public Farm() {
 		// TODO Auto-generated constructor stub
@@ -89,6 +93,14 @@ public class Farm {
 
 	public void setUpdatedAt(LocalDateTime updatedAt) {
 		this.updatedAt = updatedAt;
+	}
+
+	public List<EquipmentInventory> getEquipmentInventories() {
+		return equipmentInventories;
+	}
+
+	public void setEquipmentInventories(List<EquipmentInventory> equipmentInventories) {
+		this.equipmentInventories = equipmentInventories;
 	}
 	
 }
