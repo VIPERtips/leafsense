@@ -56,7 +56,7 @@ public class FarmController {
 			Farm newFarm = farmService.registerFarm(farmDto, profile.getProfileId());
 			return ResponseEntity.ok(new ApiResponse<>("Farm registered successfully", true, newFarm));
 		} catch (Exception e) {
-			return ResponseEntity.status(HttpStatus.NO_CONTENT).body((new ApiResponse<>(e.getMessage(), false, null)));
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body((new ApiResponse<>(e.getMessage(), false, null)));
 		}
 	}
 
@@ -70,7 +70,7 @@ public class FarmController {
 			Page<Farm> farms = farmService.getUserFarms(profile.getProfileId(),page, size );
 			return ResponseEntity.ok(new ApiResponse<>("Farm(s) retrived successfully", true, farms));
 		} catch (Exception e) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((new ApiResponse<>(e.getMessage(), false, null)));
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body((new ApiResponse<>(e.getMessage(), false, null)));
 		}
 	}
 
@@ -93,7 +93,7 @@ public class FarmController {
 			farmService.deleteFarm(id);
 			 return ResponseEntity.ok(new ApiResponse<>("Farm deleted successfully", true, null));
 		} catch (Exception e) {
-            return ResponseEntity.badRequest().body(new ApiResponse<>(e.getMessage(), false, null));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse<>(e.getMessage(), false, null));
 	}
 	}
 }
