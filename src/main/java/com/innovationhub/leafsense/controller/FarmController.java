@@ -23,6 +23,7 @@ import com.innovationhub.leafsense.service.JwtService;
 import com.innovationhub.leafsense.service.ProfileService;
 import com.innovationhub.leafsense.service.UserService;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
@@ -46,7 +47,7 @@ public class FarmController {
 		String token = request.getHeader("Authorization");
 		return (token != null && token.startsWith("Bearer ")) ? token.substring(7) : null;
 	}
-
+	@Operation(summary = "register a farm", description = "assigned to authenticated user")
 	@PostMapping
 	public ResponseEntity<ApiResponse<Farm>> registerFarm(@RequestBody FarmDto farmDto, HttpServletRequest req) {
 		try {
@@ -59,7 +60,7 @@ public class FarmController {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body((new ApiResponse<>(e.getMessage(), false, null)));
 		}
 	}
-
+	@Operation(summary = "get all farms", description = "assigned to authenticated user")
 	@GetMapping
 	public ResponseEntity<ApiResponse<Page<Farm>>> getFarms(HttpServletRequest req,
 			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
@@ -73,7 +74,7 @@ public class FarmController {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body((new ApiResponse<>(e.getMessage(), false, null)));
 		}
 	}
-
+	@Operation(summary = "update a farm", description = "assigned to authenticated user")
 	@PutMapping("/{id}")
 	public ResponseEntity<ApiResponse<Farm>> updateFarm(@RequestBody FarmDto farmDto,HttpServletRequest req,int id) {
 		try {
@@ -87,6 +88,7 @@ public class FarmController {
 	}
 	}
 	
+	@Operation(summary = "delete a farm", description = "assigned to authenticated user")
 	@DeleteMapping("/{id}")
 	public ResponseEntity<ApiResponse<Farm>> deleteFarm(HttpServletRequest req,int id) {
 		try {

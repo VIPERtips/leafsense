@@ -24,6 +24,7 @@ import com.innovationhub.leafsense.service.JwtService;
 import com.innovationhub.leafsense.service.ProfileService;
 import com.innovationhub.leafsense.service.UserService;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
@@ -45,7 +46,7 @@ public class ProfileController {
         String token = request.getHeader("Authorization");
         return (token != null && token.startsWith("Bearer ")) ? token.substring(7) : null;
     }
-    
+    @Operation(summary = "create a profile", description = "assigned to authenticated user")
     @PostMapping
     public ResponseEntity<ApiResponse<Profile>> createProfile(@RequestBody ProfileDto profile,HttpServletRequest req){
     	try {
@@ -57,7 +58,7 @@ public class ProfileController {
 			return ResponseEntity.status(HttpStatus.NO_CONTENT).body((new ApiResponse<>(e.getMessage(),false,null)));
 		}
     }
-    
+    @Operation(summary = "get a profile", description = "assigned to authenticated user")
     @GetMapping
     public ResponseEntity<ApiResponse<Profile>> getUserProfile(HttpServletRequest req){
     	try {
@@ -69,7 +70,7 @@ public class ProfileController {
 			return ResponseEntity.status(HttpStatus.NO_CONTENT).body((new ApiResponse<>(e.getMessage(),false,null)));
 		}
     }
-    
+    @Operation(summary = "gets all profile", description = "get all user profiles")
     @GetMapping("/all")
     public ResponseEntity<ApiResponse<Map<String, Page<Profile>>>> getAllProfiles(@RequestParam(defaultValue =  "0") int page,
     		@RequestParam(defaultValue =  "10") int size){
@@ -85,7 +86,7 @@ public class ProfileController {
                       .body(new ApiResponse<>("An error occurred while fetching profiles", false, null));
 		}
     }
-    
+    @Operation(summary = "delete a profile", description = "assigned to authenticated user")
     @DeleteMapping
     public ResponseEntity<ApiResponse<String>> deleteProfile(HttpServletRequest req){
     	try {
@@ -97,7 +98,7 @@ public class ProfileController {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body((new ApiResponse<>(e.getMessage(),false,null)));
 		}
     }
-    
+    @Operation(summary = "update a profile", description = "assigned to authenticated user")
     @PutMapping
     public ResponseEntity<ApiResponse<Profile>> updateProfile(@RequestBody ProfileDto profile,HttpServletRequest req){
     	try {

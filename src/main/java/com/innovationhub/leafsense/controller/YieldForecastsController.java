@@ -22,6 +22,7 @@ import com.innovationhub.leafsense.model.YieldForecasts;
 import com.innovationhub.leafsense.response.ApiResponse;
 import com.innovationhub.leafsense.service.YieldForecastsService;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
@@ -32,7 +33,7 @@ public class YieldForecastsController {
 	private YieldForecastsService yieldForecastsService;
 
 	
-	
+	 @Operation(summary = "generates a forecast", description = "data should come from model")
 	@PostMapping
 	public ResponseEntity<ApiResponse<YieldForecasts>> generateForeCast(@RequestBody YieldForecastDto forecast, @RequestParam int farmId){
 		try {
@@ -43,7 +44,7 @@ public class YieldForecastsController {
 		}
 		
 	}
-	
+	 @Operation(summary = "gets all forecast", description = " data on db")
 	@GetMapping
 	public ResponseEntity<ApiResponse<Page<YieldForecasts>>> getAllYieldForecats(@RequestParam int farmId,@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size){
 		try {
@@ -54,7 +55,7 @@ public class YieldForecastsController {
 		}
 		
 	}
-	
+	 @Operation(summary = "gets a forecast", description = " data on db")
 	@GetMapping("/{forecastId}")
 	public ResponseEntity<ApiResponse<YieldForecasts>> getForeCastById(@PathVariable int forecastId){
 		try {
@@ -65,7 +66,7 @@ public class YieldForecastsController {
 		}
 		
 	}
-	
+	 @Operation(summary = "update a forecast", description = " data on db")
 	@PutMapping("/{forecastId}")
 	public ResponseEntity<ApiResponse<YieldForecasts>> updateForecast( @RequestBody YieldForecastDto yieldForecastDto,@PathVariable int forecastId,@RequestParam int farmId){
 		try {
@@ -76,7 +77,7 @@ public class YieldForecastsController {
 		}
 		
 	}
-	
+	 @Operation(summary = "delete a forecast", description = " data on db")
 	@DeleteMapping("/{forecastId}")
 	public ResponseEntity<ApiResponse<YieldForecasts>> deleteForecast(@PathVariable int forecastId){
 		try {
