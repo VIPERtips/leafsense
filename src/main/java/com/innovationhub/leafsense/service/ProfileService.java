@@ -75,23 +75,25 @@ public class ProfileService {
 	}
 
 	public void deleteProfile(User user) {
-		try {
-			Profile profile = profileRepository.getProfileByUser_UserId(user.getUserId());
+	    try {
+	        Profile profile = profileRepository.findByUser(user)
+	                .orElseThrow(() -> new RuntimeException("No profile found for user"));
 
-			System.out.println("trying to delete profile of " + profile.getProfileId());
+	        // Disconnect the user from the profile
+	        user.setProfile(null);
+	        userRepository.save(user);
 
-			profileRepository.delete(profile);
+	        // Delete the profile 
+	        profileRepository.delete(profile);
 
-			if (profileRepository.findById(profile.getProfileId()).isPresent()) {
-				System.out.println("Profile still exists");
-			} else {
-				System.out.println("deleted bro");
-			}
-		} catch (Exception e) {
-			System.out.println("Error deleting profile");
-			throw new RuntimeException("Error deleting profile");
-		}
+	        System.out.println("Profile deleted: " + profile.getProfileId());
+
+	    } catch (Exception e) {
+	        System.out.println("Error deleting profile: " + e.getMessage());
+	        throw new RuntimeException("Error deleting profile");
+	    }
 	}
+
 
 	public Profile updateProfileByUser(ProfileDto req, User user) {
 		Profile profile = getProfileByUser(user);

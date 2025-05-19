@@ -1,5 +1,6 @@
 package com.innovationhub.leafsense.service;
 
+
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,171 +18,179 @@ public class EmailSender {
     private static final String SUPPORT_LINK = "https://app.leafsense.com";
     private static final String BUSINESS_NAME = "LeafSense";
 
-    private static final String PRIMARY_COLOR = "#28a745";     // Green
-    private static final String ACCENT_COLOR = "#FF8800";       // Orange
-    private static final String BACKGROUND_COLOR = "#f8f5f0";   // Light beige
-    private static final String TEXT_COLOR = "#333";
+    private static final String PRIMARY_COLOR = "#28a745";
+    private static final String ACCENT_COLOR = "#FF8800";
+    private static final String BACKGROUND_COLOR = "#ffffff";
+    private static final String TEXT_COLOR = "#212529";
+    private static final String BORDER_RADIUS = "8px";
 
-    public void sendEmail(String toEmail, String subject, String body) {
+    public void sendEmail(String toEmail, String subject, String bodyContent) {
         try {
             MimeMessage message = javaMailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
             helper.setFrom(new InternetAddress(SUPPORT_EMAIL, BUSINESS_NAME));
             helper.setTo(toEmail);
             helper.setSubject(subject);
-            helper.setText(wrapTemplate(body), true);
+            helper.setText(wrapInTemplate(bodyContent), true);
             javaMailSender.send(message);
-            System.out.println("Email sent to " + toEmail);
         } catch (Exception e) {
             System.err.println("Failed to send email to " + toEmail + ": " + e.getMessage());
         }
     }
 
-    private String wrapTemplate(String content) {
+    private String wrapInTemplate(String content) {
         return String.format("""
+            <!DOCTYPE html>
             <html>
-            <body style="background-color: %s; font-family: Arial, sans-serif; color: %s;">
-                <div style="background-color: %s; padding: 20px; text-align: center;">
-                    <h1 style="color: white;">%s</h1>
-                </div>
-                <div style="padding: 30px;">%s</div>
-                <div style="padding: 20px; text-align: center; font-size: 12px; color: #666;">
-                    <p>&copy; %s. All rights reserved.</p>
-                    <p><a href="%s" style="color: %s;">Visit LeafSense</a></p>
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <style>
+                    body { margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; background-color: %s; color: %s; }
+                    .container { width: 100%%; max-width: 600px; margin: auto; background-color: #ffffff; border-radius: %s; overflow: hidden; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
+                    .header { background-color: %s; padding: 24px; text-align: center; color: white; }
+                    .content { padding: 24px; }
+                    .footer { font-size: 12px; color: #777; text-align: center; padding: 16px; }
+                    .btn { display: inline-block; background-color: %s; color: white; padding: 12px 24px; border-radius: %s; text-decoration: none; font-weight: bold; }
+                    a { color: %s; text-decoration: none; }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="header">
+                        <h1>%s</h1>
+                    </div>
+                    <div class="content">
+                        %s
+                    </div>
+                    <div class="footer">
+                        &copy; %s | <a href="%s">Visit Dashboard</a>
+                    </div>
                 </div>
             </body>
             </html>
-        """, BACKGROUND_COLOR, TEXT_COLOR, PRIMARY_COLOR, BUSINESS_NAME, content, BUSINESS_NAME, SUPPORT_LINK, PRIMARY_COLOR);
+        """, BACKGROUND_COLOR, TEXT_COLOR, BORDER_RADIUS, PRIMARY_COLOR, ACCENT_COLOR, BORDER_RADIUS, PRIMARY_COLOR, BUSINESS_NAME, content, BUSINESS_NAME, SUPPORT_LINK);
     }
 
-    // ==== AUTH EMAILS ====
+    // ===== AUTH ====
 
     public void sendPasswordResetEmail(String userEmail, String username, String resetToken) {
         String resetLink = SUPPORT_LINK + "/reset-password?token=" + resetToken;
-        String body = String.format("""
-            <p>Hi <strong>%s</strong>,</p>
-            <p>We received a request to reset your password. Click below to continue:</p>
-            <p style="text-align: center;">
-                <a href="%s" style="background-color: %s; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px;">Reset Password</a>
-            </p>
-            <p>This link will expire in 24 hours. If you didn't make this request, ignore this email.</p>
-        """, username, resetLink, ACCENT_COLOR);
+        String content = String.format("""
+            <p>Hello <strong>%s</strong>,</p>
+            <p>You requested to reset your password. Click below to proceed:</p>
+            <p style="text-align: center;"><a class="btn" href="%s">Reset Password</a></p>
+            <p>This link expires in 24 hours. If you didn't request this, ignore this message.</p>
+        """, username, resetLink);
 
-        sendEmail(userEmail, BUSINESS_NAME + " - Password Reset", body);
+        sendEmail(userEmail, "Reset Your LeafSense Password", content);
     }
 
     public void sendRegistrationEmail(String userEmail, String otp) {
-        String body = String.format("""
-            <p>Welcome <strong>%s</strong>,</p>
-            <p>Thanks for joining LeafSense! Use the OTP below to activate your account:</p>
-            <h2 style="text-align: center; color: %s;">%s</h2>
-            <p>This OTP expires in 2 hours.</p>
-        """, userEmail, ACCENT_COLOR, otp);
+        String content = String.format("""
+            <p>Welcome to <strong>%s</strong>!</p>
+            <p>Your OTP code is:</p>
+            <h2 style="text-align:center; color:%s;">%s</h2>
+            <p>This OTP is valid for 2 hours. Do not share this with anyone.</p>
+        """, BUSINESS_NAME, ACCENT_COLOR, otp);
 
-        sendEmail(userEmail, BUSINESS_NAME + " - Account Activation", body);
+        sendEmail(userEmail, "Your LeafSense OTP Code", content);
     }
 
-    // ==== FARM MONITORING ====
+    // ===== MONITORING ====
 
-    public void sendCropHealthAlert(String userEmail, String farmName, String cropType) {
-        String body = String.format("""
-            <p>Attention farmer,</p>
-            <p>We’ve detected a potential issue in your <strong>%s</strong> crops at <strong>%s</strong>.</p>
-            <p>Please check your LeafSense dashboard for early intervention recommendations.</p>
-            <p><a href="%s/crop-health" style="color: %s;">View Health Report</a></p>
-        """, cropType, farmName, SUPPORT_LINK, PRIMARY_COLOR);
+    public void sendCropHealthAlert(String email, String farm, String crop) {
+        String content = String.format("""
+            <p>Heads up!</p>
+            <p>An issue has been detected in <strong>%s</strong> crops at your farm <strong>%s</strong>.</p>
+            <p>Please review and apply preventive action in your dashboard.</p>
+            <p><a class="btn" href="%s/crop-health">View Details</a></p>
+        """, crop, farm, SUPPORT_LINK);
 
-        sendEmail(userEmail, BUSINESS_NAME + " - Crop Alert", body);
+        sendEmail(email, "Crop Health Alert", content);
     }
 
-    public void sendEquipmentMaintenanceAlert(String userEmail, String equipmentName) {
-        String body = String.format("""
-            <p>Hello,</p>
-            <p>Your equipment <strong>%s</strong> is due for maintenance.</p>
-            <p>Schedule a service to avoid disruptions.</p>
-            <p><a href="%s/equipment" style="color: %s;">View Equipment</a></p>
-        """, equipmentName, SUPPORT_LINK, PRIMARY_COLOR);
+    public void sendEquipmentMaintenanceAlert(String email, String equipmentName) {
+        String content = String.format("""
+            <p>Maintenance Reminder</p>
+            <p><strong>%s</strong> is due for service based on your schedule.</p>
+            <p><a class="btn" href="%s/equipment">Schedule Maintenance</a></p>
+        """, equipmentName, SUPPORT_LINK);
 
-        sendEmail(userEmail, BUSINESS_NAME + " - Maintenance Alert", body);
+        sendEmail(email, "Equipment Maintenance Alert", content);
     }
 
-    public void sendIrrigationAlert(String userEmail, String zone) {
-        String body = String.format("""
-            <p>Hey!</p>
-            <p>Our system recommends irrigation in <strong>Zone %s</strong> based on soil moisture and forecast data.</p>
-            <p><a href="%s/irrigation" style="color: %s;">Update Schedule</a></p>
-        """, zone, SUPPORT_LINK, PRIMARY_COLOR);
+    public void sendIrrigationAlert(String email, String zone) {
+        String content = String.format("""
+            <p>Watering Advisory</p>
+            <p>Our data suggests <strong>Zone %s</strong> needs irrigation soon.</p>
+            <p><a class="btn" href="%s/irrigation">View Irrigation Plan</a></p>
+        """, zone, SUPPORT_LINK);
 
-        sendEmail(userEmail, BUSINESS_NAME + " - Irrigation Reminder", body);
+        sendEmail(email, "Irrigation Alert", content);
     }
 
-    // ==== STAFF ====
+    public void sendYieldForecastEmail(String email, String farm, String yield, String confidence) {
+        String content = String.format("""
+            <p>Hey farmer!</p>
+            <p>Based on current conditions, your estimated yield for <strong>%s</strong> is:</p>
+            <h2 style="text-align: center; color: %s;">%s kg</h2>
+            <p>Prediction Confidence: <strong>%s%%</strong></p>
+        """, farm, PRIMARY_COLOR, yield, confidence);
 
-    public void sendStaffInvitation(String userEmail, String farmName) {
-        String body = String.format("""
-            <p>Hello,</p>
-            <p>You’ve been invited to join the team managing <strong>%s</strong> on LeafSense.</p>
-            <p><a href="%s/signup" style="background-color: %s; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Join Now</a></p>
-        """, farmName, SUPPORT_LINK, PRIMARY_COLOR);
-
-        sendEmail(userEmail, BUSINESS_NAME + " - Farm Team Invitation", body);
+        sendEmail(email, "Yield Forecast Update", content);
     }
 
-    // ==== SECURITY ====
+    // ===== TEAM & SECURITY ====
 
-    public void sendSuspiciousActivityAlert(String userEmail, String deviceInfo) {
-        String body = String.format("""
-            <p>Hi,</p>
-            <p>We noticed a new login attempt from <strong>%s</strong>.</p>
-            <p>If this wasn’t you, please secure your account.</p>
-            <p><a href="%s/security" style="color: %s;">Review Activity</a></p>
-        """, deviceInfo, SUPPORT_LINK, PRIMARY_COLOR);
+    public void sendStaffInvitation(String email, String farmName) {
+        String content = String.format("""
+            <p>You've been invited to join the farm team for <strong>%s</strong>.</p>
+            <p>Click below to complete your account setup:</p>
+            <p><a class="btn" href="%s/signup">Join Now</a></p>
+        """, farmName, SUPPORT_LINK);
 
-        sendEmail(userEmail, BUSINESS_NAME + " - Security Alert", body);
+        sendEmail(email, "Farm Team Invitation", content);
     }
 
-    // ==== REPORTING ====
+    public void sendSuspiciousActivityAlert(String email, String deviceInfo) {
+        String content = String.format("""
+            <p>We detected a login from a new device:</p>
+            <p><strong>%s</strong></p>
+            <p>If this wasn't you, secure your account immediately.</p>
+            <p><a class="btn" href="%s/security">Check Activity</a></p>
+        """, deviceInfo, SUPPORT_LINK);
 
-    public void sendMonthlyReport(String userEmail, String farmName, String reportUrl) {
-        String body = String.format("""
-            <p>Hello,</p>
+        sendEmail(email, "New Login Alert", content);
+    }
+
+    // ===== REPORTS & SYSTEM ====
+
+    public void sendMonthlyReport(String email, String farmName, String reportUrl) {
+        String content = String.format("""
             <p>Your monthly report for <strong>%s</strong> is ready.</p>
-            <p><a href="%s" style="background-color: %s; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Download Report</a></p>
-        """, farmName, reportUrl, PRIMARY_COLOR);
+            <p><a class="btn" href="%s">Download Report</a></p>
+        """, farmName, reportUrl);
 
-        sendEmail(userEmail, BUSINESS_NAME + " - Monthly Report", body);
+        sendEmail(email, "Monthly Report Available", content);
     }
-
-    public void sendYieldForecastEmail(String userEmail, String farmName, String yield, String confidence) {
-        String body = String.format("""
-            <p>Hello farmer,</p>
-            <p>Based on real-time data, we predict a yield of <strong>%s</strong> for your farm <strong>%s</strong>.</p>
-            <p>Model confidence: <strong>%s%%</strong></p>
-            <p>Plan your harvest accordingly.</p>
-        """, yield, farmName, confidence);
-
-        sendEmail(userEmail, BUSINESS_NAME + " - Yield Forecast", body);
-    }
-
-    // ==== SYSTEM / ADMIN ====
 
     public void sendSystemAlertToAdmin(String message) {
-        String body = String.format("""
-            <p>System Alert:</p>
+        String content = String.format("""
+            <p><strong>System Alert:</strong></p>
             <p>%s</p>
         """, message);
 
-        sendEmail("tadiwachipungu2@gmail.com", BUSINESS_NAME + " - System Notification", body);
+        sendEmail("tadiwachipungu2@gmail.com", "LeafSense Admin Alert", content);
     }
 
-    public void sendSensorOfflineAlert(String userEmail, String sensorId) {
-        String body = String.format("""
-            <p>Alert:</p>
-            <p>Your sensor with ID <strong>%s</strong> has gone offline.</p>
-            <p>Check connection and battery status immediately.</p>
-            <p><a href="%s/sensors" style="color: %s;">Sensor Dashboard</a></p>
-        """, sensorId, SUPPORT_LINK, PRIMARY_COLOR);
+    public void sendSensorOfflineAlert(String email, String sensorId) {
+        String content = String.format("""
+            <p>Sensor <strong>%s</strong> has gone offline.</p>
+            <p>Please check power and signal status.</p>
+            <p><a class="btn" href="%s/sensors">Go to Sensors</a></p>
+        """, sensorId, SUPPORT_LINK);
 
-        sendEmail(userEmail, BUSINESS_NAME + " - Sensor Offline", body);
+        sendEmail(email, "Sensor Offline", content);
     }
 }

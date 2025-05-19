@@ -42,6 +42,8 @@ public class User implements UserDetails {
 	
 	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private Profile profile;
+	
+	
 	public  LocalDateTime getOtpExpiration() {
 		return otpExpiration;
 	}
@@ -166,6 +168,14 @@ public class User implements UserDetails {
 
 	public void setUpdatedAt(LocalDateTime updateedAt) {
 		this.updatedAt = updateedAt;
+	}
+
+	public Profile getProfile() {
+		return profile;
+	}
+
+	public void setProfile(Profile profile) {
+		this.profile = profile;
 	}
 	
 	
